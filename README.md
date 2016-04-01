@@ -1,3 +1,3 @@
-# StoreAppLauncher
-Windows Store application launcher for STEAM
+# Windows Store application launcher for STEAM
+
 //
