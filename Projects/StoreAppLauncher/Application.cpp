@@ -5,7 +5,7 @@ Application::Application( )
 	system.reset( new System( ) );
 	controller.reset( new Controller( ) );
 	keyboard.reset( new Keyboard( ) );
-	updater.reset( new Updater( ) );
+	//updater.reset( new Updater( ) );
 }
 Application::~Application( )
 {
@@ -31,7 +31,7 @@ int Application::Run( )
 #ifdef _DEBUG
 	OpenConsole( );
 #endif
-	updater->Launch( );
+	//updater->Launch( );
 	if( system->Init( ) )
 	{
 		if( system->UseController( ) )

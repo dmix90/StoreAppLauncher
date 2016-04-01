@@ -2,7 +2,7 @@
 #include "System.h"
 #include "Controller.h"
 #include "Keyboard.h"
-#include "Updater.h"
+//#include "Updater.h"
 
 class Application
 {
@@ -10,7 +10,7 @@ private:
 	unique_ptr<System>		system;
 	unique_ptr<Controller>	controller;
 	unique_ptr<Keyboard>	keyboard;
-	unique_ptr<Updater>		updater;
+	//unique_ptr<Updater>		updater;
 public:
 	Application( );
 	~Application( );
