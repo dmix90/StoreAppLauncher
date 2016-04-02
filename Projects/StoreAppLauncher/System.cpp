@@ -4,6 +4,7 @@ System::System( )
 	:m_uNumArgs( 0 ), m_ulAppStatus( STILL_ACTIVE ), m_ulProcessId( 0 ), m_bUseController( false )
 {
 	m_wsArgs.clear( );
+	m_updater.reset( new Updater( ) );
 }
 
 System::~System( )
@@ -38,6 +39,7 @@ bool System::GetAppId( )
 		{
 		case IDOK:
 		{
+			m_updater->Launch( );
 			break;
 		}
 		case IDCANCEL:
