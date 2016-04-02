@@ -4,6 +4,7 @@
 #include <ShObjIdl.h>
 #include <strsafe.h>
 #include "Shlwapi.h"
+#include <ctype.h>
 
 class Updater
 {
@@ -17,6 +18,7 @@ private:
 private:
 	void GetCurrentDir( );
 	void GetCurrentDirFiles( );
+	void ListReadyFiles( );
 	void ReplaceCurrentDirFiles( );
 public:
 	void Launch( );

@@ -9,9 +9,11 @@ private:
 	unique_ptr<System>		system;
 	unique_ptr<Controller>	controller;
 	unique_ptr<Keyboard>	keyboard;
+private:
+	wstring m_wsUniqueMutex;
+	HANDLE	m_hAppHandle;
 public:
 	Application( );
 	~Application( );
-	void OpenConsole( );
 	int Run( );
 };
