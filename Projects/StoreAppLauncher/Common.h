@@ -18,6 +18,9 @@
 #include <io.h>
 #include <fcntl.h>
 
+#include <stdlib.h>
+#include <crtdbg.h>
+
 using std::wcout;
 using std::endl;
 using std::string;
