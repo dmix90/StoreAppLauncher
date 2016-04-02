@@ -16,9 +16,15 @@ private:
 	void*				m_hProcess;
 	bool				m_bUseController;
 	int					m_iControllerMode;
+	HWND				m_hWndTop;
+	HWND				m_hWndBottom;
+	HWND				m_hWndApp;
+	HWND				m_hWndSteam;
 private:
 	bool GetAppId( );
 	bool OpenAppById( );
+	void FindAppWindowHandle( );
+	HWND GetProcessWindow( DWORD );
 public:
 	void OpenConsole( );
 	bool Init( );
@@ -27,4 +33,5 @@ public:
 	void Update( uint );
 	void Shutdown( );
 	int	 GetControllerMode( );
+	void SwitchForegroundWindow( );
 };

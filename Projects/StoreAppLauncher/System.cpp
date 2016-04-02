@@ -105,6 +105,43 @@ bool System::OpenAppById( )
 	}
 	return false;
 }
+HWND System::GetProcessWindow( DWORD pId )
+{
+	bool bFound = false;
+	HWND prevWindow = 0;
+
+	while( !bFound )
+	{
+		HWND desktopWindow = GetDesktopWindow( );
+		if( !desktopWindow )
+			break;
+
+		HWND nextWindow = FindWindowEx( desktopWindow, prevWindow, NULL, NULL );
+		if( !nextWindow )
+			break;
+
+		// Check whether window belongs to the correct process.
+		DWORD procId = -1;
+		GetWindowThreadProcessId( nextWindow, &procId );
+
+		if( procId == pId )
+		{
+			// Add additional checks. In my case, I had to bring the window to front so these checks were necessary.
+			wchar_t windowText[ 1024 ];
+			if( IsWindowVisible( nextWindow ) && !IsIconic( nextWindow ) && GetWindowText( nextWindow, (LPWSTR)windowText, sizeof( windowText ) / sizeof( wchar_t ) )
+				&& !GetParent( nextWindow ) )
+				return nextWindow;
+		}
+
+		prevWindow = nextWindow;
+	}
+
+	return 0;
+}
+void System::FindAppWindowHandle( )
+{
+	HWND hWnd = GetProcessWindow( m_ulProcessId );
+}
 
 bool System::Init( )
 {
@@ -114,6 +151,7 @@ bool System::Init( )
 		if( status = OpenAppById( ) )
 		{
 			m_hProcess = OpenProcess( PROCESS_ALL_ACCESS, FALSE, m_ulProcessId );
+			FindAppWindowHandle( );
 		}
 	}
 	return status;
@@ -158,4 +196,21 @@ void System::Shutdown( )
 int System::GetControllerMode( )
 {
 	return m_iControllerMode;
+}
+
+void System::SwitchForegroundWindow( )
+{
+	m_hWndTop = GetForegroundWindow( );
+	HWND hWnd = GetProcessWindow( m_ulProcessId );
+	wstring className( MAX_PATH, '\0' );
+	wstring windowText( MAX_PATH, '\0' );
+	GetClassName( m_hWndTop, &className[ 0 ], MAX_PATH );
+	GetWindowText( m_hWndTop, &windowText[ 0 ], MAX_PATH );
+	wcout << "ForegrounWindow Class: " << className.c_str( ) << endl;
+	wcout << "ForegrounWindow Text: " << windowText.c_str( ) << endl;
+
+	GetClassName( hWnd, &className[ 0 ], MAX_PATH );
+	GetWindowText( hWnd, &windowText[ 0 ], MAX_PATH );
+	wcout << "ProcWindow Class: " << className.c_str( ) << endl;
+	wcout << "ProcWindow Text: " << windowText.c_str( ) << endl;
 }

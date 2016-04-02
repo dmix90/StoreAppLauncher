@@ -38,9 +38,9 @@ int Application::Run( )
 					{
 						Beep( 250, 400 );
 						keyboard->VirtualAltTab( );
+						//system->SwitchForegroundWindow( );
 						Sleep( 200 );
 					}
-					break;
 					break;
 				}		
 				case 1:
