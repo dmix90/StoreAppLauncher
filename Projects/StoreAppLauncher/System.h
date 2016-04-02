@@ -23,8 +23,6 @@ private:
 private:
 	bool GetAppId( );
 	bool OpenAppById( );
-	void FindAppWindowHandle( );
-	HWND GetProcessWindow( DWORD );
 public:
 	void OpenConsole( );
 	bool Init( );
@@ -33,5 +31,4 @@ public:
 	void Update( uint );
 	void Shutdown( );
 	int	 GetControllerMode( );
-	void SwitchForegroundWindow( );
 };

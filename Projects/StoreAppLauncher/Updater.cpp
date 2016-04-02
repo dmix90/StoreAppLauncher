@@ -60,10 +60,8 @@ void Updater::ListReadyFiles( )
 }
 void Updater::ReplaceCurrentDirFiles( )
 {
-	wstring tempCurrentFileName;
 	for( uint i = 0; i < m_wsFileList.size( ); i++ )
 	{
-		tempCurrentFileName = m_wsFileList[ i ];
 		CopyFile( m_wsExe.c_str( ), m_wsFileList[ i ].c_str( ), FALSE );
 	}
 }
