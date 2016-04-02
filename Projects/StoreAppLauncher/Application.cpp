@@ -1,6 +1,7 @@
 #include "Application.h"
 
 Application::Application( )
+	:m_wsUniqueMutex( L"StoreAppLauncher" ), m_hAppHandle( nullptr )
 {
 	system.reset( new System( ) );
 	controller.reset( new Controller( ) );
@@ -9,27 +10,17 @@ Application::Application( )
 Application::~Application( )
 {
 }
-void Application::OpenConsole( )
-{
-	AllocConsole( );
-
-	HANDLE handle_out = GetStdHandle( STD_OUTPUT_HANDLE );
-	int hCrt = _open_osfhandle( (long)handle_out, _O_TEXT );
-	FILE* hf_out = _fdopen( hCrt, "w" );
-	setvbuf( hf_out, NULL, _IONBF, 1 );
-	*stdout = *hf_out;
-
-	HANDLE handle_in = GetStdHandle( STD_INPUT_HANDLE );
-	hCrt = _open_osfhandle( (long)handle_in, _O_TEXT );
-	FILE* hf_in = _fdopen( hCrt, "r" );
-	setvbuf( hf_in, NULL, _IONBF, 128 );
-	*stdin = *hf_in;
-}
 int Application::Run( )
 {
 #ifdef _DEBUG
-	OpenConsole( );
+	system->OpenConsole( );
 #endif
+	m_hAppHandle = CreateMutex( 0, TRUE, m_wsUniqueMutex.c_str( ) );
+	if( GetLastError( ) == ERROR_ALREADY_EXISTS )
+	{
+		return 0;
+	}
+
 	if( system->Init( ) )
 	{
 		if( system->UseController( ) )
@@ -39,11 +30,31 @@ int Application::Run( )
 			while( system->StillRunning( ) )
 			{
 				controller->Update( 100 );
-				if( controller->IsPressed( XINPUT_GAMEPAD_GUIDE ) )
+				switch( system->GetControllerMode( ) )
 				{
-					Beep( 250, 400 );
-					keyboard->VirtualAltTab( );
-					Sleep( 200 );
+				case 0:
+				{
+					if( controller->IsPressed( XINPUT_GAMEPAD_BACK ) && controller->IsPressed( XINPUT_GAMEPAD_START ) && controller->m_LeftTrigger.Value > 0 )
+					{
+						Beep( 250, 400 );
+						keyboard->VirtualAltTab( );
+						Sleep( 200 );
+					}
+					break;
+					break;
+				}		
+				case 1:
+				{	
+					if( controller->IsPressed( XINPUT_GAMEPAD_GUIDE ) )
+					{
+						Beep( 250, 400 );
+						keyboard->VirtualAltTab( );
+						Sleep( 200 );
+					}
+					break;
+				}
+				default:
+					break;
 				}
 			}
 		}
@@ -53,7 +64,10 @@ int Application::Run( )
 		}
 		keyboard->VirtualAltTab( );
 		controller->Shutdown( );
-		system->Shutdown( );	
+		system->Shutdown( );
+
+		ReleaseMutex( m_hAppHandle );
+		CloseHandle( m_hAppHandle );
 	}
 #ifdef _DEBUG
 	FreeConsole( );

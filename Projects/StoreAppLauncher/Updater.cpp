@@ -49,9 +49,13 @@ void Updater::GetCurrentDirFiles( )
 
 		FindClose( hFind );
 	}
+}
+void Updater::ListReadyFiles( )
+{
+	wcout << "Files that will be replaced : " << endl << endl;
 	for( uint i = 0; i < m_wsFileList.size( ); i++ )
 	{
-		wcout << m_wsFileList[ i ].c_str() << endl;
+		wcout << m_wsFileList[ i ].c_str( ) << endl;
 	}
 }
 void Updater::ReplaceCurrentDirFiles( )
@@ -65,7 +69,16 @@ void Updater::ReplaceCurrentDirFiles( )
 }
 void Updater::Launch( )
 {
+	wstring answer( 10, '\0' );
 	GetCurrentDir( );
 	GetCurrentDirFiles( );
-	ReplaceCurrentDirFiles( );
+	ListReadyFiles( );
+	_tprintf( L"\nListed files are going to be updated/replaced with %s \nDo you want to continue? Y\\N \n>", m_wsExe.c_str( ) );
+	std::wcin >> &answer[0];
+	_wcslwr_s( &answer[0], answer.length() );
+	answer.resize( wcslen( &answer[ 0 ] ) );
+	if( !wcscmp( &answer[ 0 ], L"y" ) || !wcscmp( &answer[ 0 ], L"yes" ) )
+	{
+		ReplaceCurrentDirFiles( );
+	}
 }

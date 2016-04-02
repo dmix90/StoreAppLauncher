@@ -15,13 +15,16 @@ private:
 	ulong				m_ulAppStatus;
 	void*				m_hProcess;
 	bool				m_bUseController;
+	int					m_iControllerMode;
 private:
 	bool GetAppId( );
 	bool OpenAppById( );
 public:
+	void OpenConsole( );
 	bool Init( );
 	bool UseController( );
 	bool StillRunning( );
 	void Update( uint );
 	void Shutdown( );
+	int	 GetControllerMode( );
 };

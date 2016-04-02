@@ -1,7 +1,7 @@
 #include "System.h"
 
 System::System( )
-	:m_uNumArgs( 0 ), m_ulAppStatus( STILL_ACTIVE ), m_ulProcessId( 0 ), m_bUseController( false )
+	:m_uNumArgs( 0 ), m_ulAppStatus( STILL_ACTIVE ), m_ulProcessId( 0 ), m_bUseController( false ), m_iControllerMode( 0 )
 {
 	m_wsArgs.clear( );
 	m_updater.reset( new Updater( ) );
@@ -10,7 +10,22 @@ System::System( )
 System::~System( )
 {
 }
+void System::OpenConsole( )
+{
+	AllocConsole( );
 
+	HANDLE handle_out = GetStdHandle( STD_OUTPUT_HANDLE );
+	int hCrt = _open_osfhandle( (long)handle_out, _O_TEXT );
+	FILE* hf_out = _fdopen( hCrt, "w" );
+	setvbuf( hf_out, NULL, _IONBF, 1 );
+	*stdout = *hf_out;
+
+	HANDLE handle_in = GetStdHandle( STD_INPUT_HANDLE );
+	hCrt = _open_osfhandle( (long)handle_in, _O_TEXT );
+	FILE* hf_in = _fdopen( hCrt, "r" );
+	setvbuf( hf_in, NULL, _IONBF, 128 );
+	*stdin = *hf_in;
+}
 bool System::GetAppId( )
 {
 	wchar_t** args = CommandLineToArgvW( GetCommandLine( ), &m_uNumArgs );
@@ -26,6 +41,12 @@ bool System::GetAppId( )
 			if( !wcscmp( args[ 2 ], L"bp" ) )
 			{
 				m_bUseController = true;
+				m_iControllerMode = 0;
+			}
+			if( !wcscmp( args[ 2 ], L"bp1" ) )
+			{
+				m_bUseController = true;
+				m_iControllerMode = 1;
 			}
 		}
 	}
@@ -39,7 +60,13 @@ bool System::GetAppId( )
 		{
 		case IDOK:
 		{
+#ifndef _DEBUG
+	OpenConsole( );
+#endif
 			m_updater->Launch( );
+#ifndef _DEBUG
+	FreeConsole( );
+#endif
 			break;
 		}
 		case IDCANCEL:
@@ -74,7 +101,7 @@ bool System::OpenAppById( )
 	}
 	else
 	{
-		MessageBox( 0, L"Please double check Application ID", L"ERROR: Application ID is probably not correct", MB_ICONERROR | MB_OK );
+		MessageBox( 0, L"Please double-check Application ID", L"ERROR: Application ID is probably not correct", MB_ICONERROR | MB_OK );
 	}
 	return false;
 }
@@ -126,4 +153,9 @@ void System::Shutdown( )
 	TerminateProcess( m_hProcess, 0 );
 	CloseHandle( m_hProcess );
 	CoUninitialize( );
+}
+
+int System::GetControllerMode( )
+{
+	return m_iControllerMode;
 }
