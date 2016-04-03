@@ -75,25 +75,15 @@ bool System::GetAppId( )
 	}
 	else
 	{
-		switch( MessageBox( 0, L"Launch parameter was not found. Do you want to update executables within this directory?", L"WARNING: Missing parameter/Update", MB_ICONINFORMATION | MB_OKCANCEL | MB_DEFBUTTON2 ) )
-		{
-		case IDOK:
+		if( MessageBox( 0, L"Launch parameter was not found. Do you want to update executables within this directory?", L"WARNING: Missing parameter/Update", MB_ICONINFORMATION | MB_OKCANCEL | MB_DEFBUTTON2 ) == IDOK )
 		{
 #ifndef _DEBUG
-	OpenConsole( );
+			OpenConsole( );
 #endif
 			m_updater->Launch( );
 #ifndef _DEBUG
-	FreeConsole( );
+			FreeConsole( );
 #endif
-			break;
-		}
-		case IDCANCEL:
-		{
-			break;
-		}		
-		default:
-			break;
 		}
 	}
 	return false;

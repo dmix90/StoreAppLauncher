@@ -44,7 +44,13 @@ int Application::Run( )
 				}		
 				case 1:
 				{	
-					if( controller->IsPressed( XINPUT_GAMEPAD_GUIDE ) )
+					/*if( controller->IsPressed( XINPUT_GAMEPAD_GUIDE ) )
+					{
+						Beep( 250, 400 );
+						keyboard->VirtualAltTab( );
+						Sleep( 200 );
+					}*/
+					if( controller->IsHeldFor( XINPUT_GAMEPAD_GUIDE, 3000 ) )
 					{
 						Beep( 250, 400 );
 						keyboard->VirtualAltTab( );

@@ -1,5 +1,24 @@
 #include "Controller.h"
 
+int ControllerButtons[ ] =
+{
+	XINPUT_GAMEPAD_GUIDE,
+	XINPUT_GAMEPAD_DPAD_UP,
+	XINPUT_GAMEPAD_DPAD_DOWN,
+	XINPUT_GAMEPAD_DPAD_LEFT,
+	XINPUT_GAMEPAD_DPAD_RIGHT,
+	XINPUT_GAMEPAD_START,
+	XINPUT_GAMEPAD_BACK,
+	XINPUT_GAMEPAD_LEFT_THUMB,
+	XINPUT_GAMEPAD_RIGHT_THUMB,
+	XINPUT_GAMEPAD_LEFT_SHOULDER,
+	XINPUT_GAMEPAD_RIGHT_SHOULDER,
+	XINPUT_GAMEPAD_A,
+	XINPUT_GAMEPAD_B,
+	XINPUT_GAMEPAD_X,
+	XINPUT_GAMEPAD_Y,
+};
+
 typedef DWORD( WINAPI* XInputGetStateEx_t )( DWORD dwUserIndex, XINPUT_STATE *pState );
 XInputGetStateEx_t XInputGetStateEx = NULL;
 
@@ -18,6 +37,15 @@ Controller::Controller( float x, float y )
 	m_Id = -1;
 	XInputGetStateEx( m_Id, &m_State );
 	m_Deadzone = { x, y };
+
+	for( uint i = 0; i < ARRAYSIZE( ControllerButtons ); i++ )
+	{
+		Button temp;
+		temp.Id = ControllerButtons[ i ];
+		temp.WasPressed = false;
+		temp.HeldFor = 0;
+		m_Buttons.push_back( temp );
+	}
 }
 
 Controller::~Controller( )
@@ -59,6 +87,22 @@ bool Controller::Init( float x, float y )
 	return false;
 }
 
+void Controller::ButtonStateUpdate( )
+{
+	for( uint i = 0; i < m_Buttons.size(); i++ )
+	{
+		if( IsPressed( m_Buttons[ i ].Id ) )
+		{
+			m_Buttons[ i ].WasPressed = true;
+			m_Buttons[ i ].HeldFor += m_PoolRate;
+		}
+		else
+		{
+			m_Buttons[ i ].HeldFor = 0;
+		}
+	}
+}
+
 int Controller::GetPort( )
 {
 	return m_Id;
@@ -87,6 +131,7 @@ bool Controller::CheckConnection( )
 
 bool Controller::Update( uint timeout )
 {
+	m_PoolRate = timeout;
 	if( timeout > 0 )
 	{
 		Sleep( timeout );
@@ -103,6 +148,8 @@ bool Controller::Update( uint timeout )
 			m_Id = -1;
 			return false;
 		}
+
+		ButtonStateUpdate( );
 
 		float normLX = fmaxf( -1, static_cast<float>( m_State.Gamepad.sThumbLX ) / 32767 );
 		float normLY = fmaxf( -1, static_cast<float>( m_State.Gamepad.sThumbLY ) / 32767 );
@@ -150,6 +197,22 @@ bool Controller::Update( uint timeout )
 bool Controller::IsPressed( uint val )
 {
 	return ( m_State.Gamepad.wButtons & val ) != 0;
+}
+
+bool Controller::IsHeldFor( uint id, uint time )
+{
+	for( uint i = 0; i < m_Buttons.size( ); i++ )
+	{
+		if( m_Buttons[ i ].Id == id )
+		{
+			if( m_Buttons[ i ].HeldFor >= time )
+			{
+				m_Buttons[ i ].HeldFor = 0;
+				return true;
+			}		
+		}
+	}
+	return false;
 }
 
 void Controller::Shutdown( )
