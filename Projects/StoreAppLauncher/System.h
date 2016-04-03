@@ -21,6 +21,7 @@ private:
 private:
 	bool GetAppId( );
 	bool OpenAppById( );
+	bool IsExplorerRunning( );
 public:
 	void OpenConsole( );
 	bool Init( );

@@ -36,60 +36,35 @@ bool System::GetAppId( )
 #ifdef _DEBUG
 		wcout << i << ": " << m_wsArgs[ i ].c_str() << endl;
 #endif
-		if( i == 2 )
+		if( !wcscmp( args[ i ], L"bp" ) )
 		{
-			if( !wcscmp( args[ 2 ], L"bp" ) )
-			{
-				m_bUseController = true;
-				m_iControllerMode = 0;
-			}
-			if( !wcscmp( args[ 2 ], L"bp1" ) )
-			{
-				m_bUseController = true;
-				m_iControllerMode = 1;
-			}
+			m_bUseController = true;
+			m_iControllerMode = 0;
 		}
-		if( i == 3 )
+		if( !wcscmp( args[ i ], L"bp1" ) )
 		{
-			if( !wcscmp( args[ 3 ], L"shell" ) )
+			m_bUseController = true;
+			m_iControllerMode = 1;
+		}
+		if( !wcscmp( args[ i ], L"shell" ) )
+		{
+			wstring buf( MAX_PATH, '\0' );
+			GetWindowsDirectory( &buf[ 0 ], MAX_PATH );
+			buf.resize( wcslen( &buf[ 0 ] ) );
+			buf += L"\\explorer.exe";
+
+			STARTUPINFO cif;
+			ZeroMemory( &cif, sizeof( cif ) );
+
+			if( !IsExplorerRunning( ) )
 			{
-				wstring buf( MAX_PATH, '\0' );
-				GetWindowsDirectory( &buf[ 0 ], MAX_PATH );
-				buf.resize( wcslen( &buf[ 0 ] ) );
-				buf += L"\\explorer.exe";
-
-				STARTUPINFO cif;
-				ZeroMemory( &cif, sizeof( cif ) );
-
-				bool exists = false;
-				PROCESSENTRY32 entry;
-				entry.dwSize = sizeof( PROCESSENTRY32 );
-
-				HANDLE snapshot = CreateToolhelp32Snapshot( TH32CS_SNAPPROCESS, NULL );
-
-				if( Process32First( snapshot, &entry ) )
+				if( CreateProcess( buf.c_str( ), 0, 0, 0, FALSE, 0, 0, 0, &cif, &m_pInfo ) )
 				{
-					while( Process32Next( snapshot, &entry ) )
-					{
-						if( !_wcsicmp( entry.szExeFile, L"explorer.exe" ) )
-						{
-							exists = true;
-							break;
-						}
-					}
+					m_bBootExplorer = true;
 				}
-				CloseHandle( snapshot );
-
-				if( !exists )
+				else
 				{
-					if( CreateProcess( buf.c_str( ), 0, 0, 0, FALSE, 0, 0, 0, &cif, &m_pInfo ) )
-					{
-						m_bBootExplorer = true;
-					}
-					else
-					{
-						MessageBox( 0, L"Explorer was not launched", L"ERROR: Unknown Error", MB_ICONERROR | MB_OK );
-					}
+					MessageBox( 0, L"Explorer was not launched", L"ERROR: Unknown Error", MB_ICONERROR | MB_OK );
 				}
 			}
 		}
@@ -191,7 +166,30 @@ bool System::OpenAppById( )
 		MessageBox( 0, L"Please double-check Application ID", L"ERROR: Application ID is probably not correct", MB_ICONERROR | MB_OK );
 		assert( SUCCEEDED( hr ) );
 	}
-	return false;
+	return true;
+}
+
+bool System::IsExplorerRunning( )
+{
+	bool exists = false;
+	PROCESSENTRY32 entry;
+	entry.dwSize = sizeof( PROCESSENTRY32 );
+
+	HANDLE snapshot = CreateToolhelp32Snapshot( TH32CS_SNAPPROCESS, NULL );
+
+	if( Process32First( snapshot, &entry ) )
+	{
+		while( Process32Next( snapshot, &entry ) )
+		{
+			if( !_wcsicmp( entry.szExeFile, L"explorer.exe" ) )
+			{
+				exists = true;
+				break;
+			}
+		}
+	}
+	CloseHandle( snapshot );
+	return exists;
 }
 
 bool System::Init( )
