@@ -15,16 +15,12 @@ private:
 	ulong				m_ulAppStatus;
 	void*				m_hProcess;
 	bool				m_bUseController;
+	bool				m_bBootExplorer;
 	int					m_iControllerMode;
-	HWND				m_hWndTop;
-	HWND				m_hWndBottom;
-	HWND				m_hWndApp;
-	HWND				m_hWndSteam;
+	PROCESS_INFORMATION m_pInfo;
 private:
 	bool GetAppId( );
 	bool OpenAppById( );
-	void FindAppWindowHandle( );
-	HWND GetProcessWindow( DWORD );
 public:
 	void OpenConsole( );
 	bool Init( );
@@ -33,5 +29,4 @@ public:
 	void Update( uint );
 	void Shutdown( );
 	int	 GetControllerMode( );
-	void SwitchForegroundWindow( );
 };

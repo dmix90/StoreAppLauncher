@@ -29,7 +29,7 @@ int Application::Run( )
 			t1.detach( );
 			while( system->StillRunning( ) )
 			{
-				controller->Update( 100 );
+				controller->Update( 125 );
 				switch( system->GetControllerMode( ) )
 				{
 				case 0:
@@ -38,7 +38,6 @@ int Application::Run( )
 					{
 						Beep( 250, 400 );
 						keyboard->VirtualAltTab( );
-						//system->SwitchForegroundWindow( );
 						Sleep( 200 );
 					}
 					break;
@@ -62,13 +61,13 @@ int Application::Run( )
 		{
 			system->Update( 1500 );
 		}
-		keyboard->VirtualAltTab( );
-		controller->Shutdown( );
-		system->Shutdown( );
-
-		ReleaseMutex( m_hAppHandle );
-		CloseHandle( m_hAppHandle );
 	}
+	keyboard->VirtualAltTab( );
+	controller->Shutdown( );
+	system->Shutdown( );
+
+	ReleaseMutex( m_hAppHandle );
+	CloseHandle( m_hAppHandle );
 #ifdef _DEBUG
 	FreeConsole( );
 #endif
