@@ -52,7 +52,7 @@ IT WILL TRY TO OVERWRITE ANY .exe FILES IT HAS BEEN ABLE TO FIND IN CURRENT DIRE
 
 2. Now launcher will try to open explorer.exe if there is currently no such process running and close it after you quit game. Should be useful if you using Steam as startup shell for windows because UWA's wont launch if there is no explorer shell running -_-
 
-3. Added launch parameter "bp1". Now you can use GUIDE button on your controller to Alt+Tab to Steam Big Picture interface.
+3. Added launch parameter "bp1". Now you can use Guide button on your controller to Alt+Tab to Steam Big Picture interface.
 4. Alt+F4 functionality by pressing Guide + Back if you using new "bp1" parameter or Back+Start+LeftTrigger+RightTrigger if you using old "bp" parameter.
 5. Executable size is greatly reduced. I used uncompressed icon in previous version, lol. Sorry -_-
 6. Now launcher runs in two threads( one for checking game/app status other for checking controller input ).
