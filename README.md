@@ -34,7 +34,7 @@ Alt+Tab -> press Guide. You should hear "Beep" and get back to Steam Big Picture
 Alt+F4  -> press Guide + Back. You should hear "Beep" , game should close and you should be back to Big Picture interface.
 ________________________________________________________________________________________________
 
-#Launch Options example: Microsoft.WindowsCalculator_8wekyb3d8bbwe!App bp1
+Launch Options example: Microsoft.WindowsCalculator_8wekyb3d8bbwe!App bp1
 ________________________________________________________________________________________________
 
 
