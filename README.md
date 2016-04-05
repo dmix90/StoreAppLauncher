@@ -1,7 +1,7 @@
 #Windows Store application launcher for STEAM
 ________________________________________________________________________________________________
 
-You need to find application id you want to launch on steam. 
+You need to find application id first.
 Take a look at AppID_List.txt, there you will find some id's for "big" games from Windows Store.
 
 #How to find Application ID:
