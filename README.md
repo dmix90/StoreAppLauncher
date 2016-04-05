@@ -26,11 +26,17 @@ for multiple applications in your library.
 It will only switch between two last windows so be careful with that.
 
 Only two additional parameters are supported at this moment:
+
 "bp":
+
 Alt+Tab -> press Back + Start + LeftTrigger. You should hear "Beep" and get back to Steam Big Picture Interface.
+
 Alt+F4  -> press Back + Start + LeftTrigger + RightTrigger. You should hear "Beep" , game should close and you should be back to Big Picture interface.
+
 "bp1":
+
 Alt+Tab -> press Guide. You should hear "Beep" and get back to Steam Big Picture Interface.
+
 Alt+F4  -> press Guide + Back. You should hear "Beep" , game should close and you should be back to Big Picture interface.
 ________________________________________________________________________________________________
 
