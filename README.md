@@ -1,10 +1,10 @@
-Windows Store application launcher for STEAM
+#Windows Store application launcher for STEAM
 ________________________________________________________________________________________________
 
 You need to find application id you want to launch on steam. 
 Take a look at AppID_List.txt, there you will find some id's for "big" games from Windows Store.
 
-How to find Application ID:
+#How to find Application ID:
 1. Launch Go to Applications Folder link from archive you downloaded.
 2. Press the F10 key on the keyboard. The window will get a menu, click View -> Choose Details.
 3. In the next dialog, tick the AppUserModelId checkbox.
@@ -13,7 +13,7 @@ How to find Application ID:
 6. Enter this id as a parameter to StoreAppLauncher_xXX.exe
 ________________________________________________________________________________________________
 
-How to use launcher:
+#How to use launcher:
 1. Copy->Paste StoreAppLauncher_xXX to a folder( example D:\Games\WindowsStore\_Games\ ) where you 
 want to keep your game launchers. You need a copy with unique name for each application you want 
 to launch from Steam because it will overwrite launch parameters if you have single executable 
@@ -34,11 +34,11 @@ Alt+Tab -> press Guide. You should hear "Beep" and get back to Steam Big Picture
 Alt+F4  -> press Guide + Back. You should hear "Beep" , game should close and you should be back to Big Picture interface.
 ________________________________________________________________________________________________
 
-Launch Options example: Microsoft.WindowsCalculator_8wekyb3d8bbwe!App bp1
+#Launch Options example: Microsoft.WindowsCalculator_8wekyb3d8bbwe!App bp1
 ________________________________________________________________________________________________
 
 
-NEW: 
+#NEW: 
 1. If you used previous version of a launcher and have a lot of copies already you can try to use Update function. 
 Just copy new version to a directory where you keep other launchers and launch it without any parameters through explorer. 
 It will ask if you want to update current directory executable files. 
