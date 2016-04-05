@@ -1,4 +1,5 @@
 #include "Controller.h"
+#include <DirectXTK\GamePad.h>
 
 int ControllerButtons[ ] =
 {
@@ -36,14 +37,19 @@ Controller::Controller( float x, float y )
 
 	m_Id = -1;
 	XInputGetStateEx( m_Id, &m_State );
+	m_PrevState = m_State;
 	m_Deadzone = { x, y };
 
 	for( uint i = 0; i < ARRAYSIZE( ControllerButtons ); i++ )
 	{
 		Button temp;
 		temp.Id = ControllerButtons[ i ];
+		temp.Pressed = false;
 		temp.WasPressed = false;
+		temp.Released = false;
+		temp.Held = false;
 		temp.HeldFor = 0;
+		temp.WasHeldFor = 0;
 		m_Buttons.push_back( temp );
 	}
 }
@@ -55,17 +61,17 @@ Controller::~Controller( )
 
 bool Controller::GetXInputLibrary( HINSTANCE& lib )
 {
-	lib = LoadLibrary( L"xinput1_4.dll" );
+	lib = LoadLibraryEx( L"xinput1_4.dll", 0, 0 );
 	if( lib )
 	{
 		return true;
 	}
-	lib = LoadLibrary( L"xinput9_1_0.dll" );
+	lib = LoadLibraryEx( L"xinput9_1_0.dll", 0, 0 );
 	if( lib )
 	{
 		return true;
 	}
-	lib = LoadLibrary( L"xinput1_3.dll" );
+	lib = LoadLibraryEx( L"xinput1_3.dll", 0, 0 );
 	if( lib )
 	{
 		return true;
@@ -89,18 +95,7 @@ bool Controller::Init( float x, float y )
 
 void Controller::ButtonStateUpdate( )
 {
-	for( uint i = 0; i < m_Buttons.size(); i++ )
-	{
-		if( IsPressed( m_Buttons[ i ].Id ) )
-		{
-			m_Buttons[ i ].WasPressed = true;
-			m_Buttons[ i ].HeldFor += m_PoolRate;
-		}
-		else
-		{
-			m_Buttons[ i ].HeldFor = 0;
-		}
-	}
+	//Later
 }
 
 int Controller::GetPort( )
@@ -150,6 +145,7 @@ bool Controller::Update( uint timeout )
 		}
 
 		ButtonStateUpdate( );
+		m_PrevState = m_State;
 
 		float normLX = fmaxf( -1, static_cast<float>( m_State.Gamepad.sThumbLX ) / 32767 );
 		float normLY = fmaxf( -1, static_cast<float>( m_State.Gamepad.sThumbLY ) / 32767 );
@@ -199,19 +195,14 @@ bool Controller::IsPressed( uint val )
 	return ( m_State.Gamepad.wButtons & val ) != 0;
 }
 
+bool Controller::WasPressed( uint val )
+{
+	return ( m_PrevState.Gamepad.wButtons & val ) != 0;
+}
+
 bool Controller::IsHeldFor( uint id, uint time )
 {
-	for( uint i = 0; i < m_Buttons.size( ); i++ )
-	{
-		if( m_Buttons[ i ].Id == id )
-		{
-			if( m_Buttons[ i ].HeldFor >= time )
-			{
-				m_Buttons[ i ].HeldFor = 0;
-				return true;
-			}		
-		}
-	}
+	//Later
 	return false;
 }
 

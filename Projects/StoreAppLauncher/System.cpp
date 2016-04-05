@@ -46,28 +46,6 @@ bool System::GetAppId( )
 			m_bUseController = true;
 			m_iControllerMode = 1;
 		}
-		if( !wcscmp( args[ i ], L"shell" ) )
-		{
-			wstring buf( MAX_PATH, '\0' );
-			GetWindowsDirectory( &buf[ 0 ], MAX_PATH );
-			buf.resize( wcslen( &buf[ 0 ] ) );
-			buf += L"\\explorer.exe";
-
-			STARTUPINFO cif;
-			ZeroMemory( &cif, sizeof( cif ) );
-
-			if( !IsExplorerRunning( ) )
-			{
-				if( CreateProcess( buf.c_str( ), 0, 0, 0, FALSE, 0, 0, 0, &cif, &m_pInfo ) )
-				{
-					m_bBootExplorer = true;
-				}
-				else
-				{
-					MessageBox( 0, L"Explorer was not launched", L"ERROR: Unknown Error", MB_ICONERROR | MB_OK );
-				}
-			}
-		}
 	}
 	if( m_wsArgs.size( ) > 1 )
 	{
@@ -181,11 +159,50 @@ bool System::IsExplorerRunning( )
 	CloseHandle( snapshot );
 	return exists;
 }
+void System::LaunchExplorer( )
+{
+	wstring buf( MAX_PATH, '\0' );
+	GetWindowsDirectory( &buf[ 0 ], MAX_PATH );
+	buf.resize( wcslen( &buf[ 0 ] ) );
+	buf += L"\\explorer.exe";
+
+	STARTUPINFO cif;
+	ZeroMemory( &cif, sizeof( cif ) );
+
+	if( !IsExplorerRunning( ) )
+	{
+		if( CreateProcess( buf.c_str( ), 0, 0, 0, FALSE, 0, 0, 0, &cif, &m_pInfo ) )
+		{
+			m_bBootExplorer = true;
+		}
+		else
+		{
+			MessageBox( 0, L"Explorer was not launched", L"ERROR: Unknown Error", MB_ICONERROR | MB_OK );
+		}
+	}
+}
+
+bool System::FindProcessWindow( HWND& hWnd, ulong pId )
+{
+	ulong pIdtemp = 0;
+	for( HWND hWndTemp = GetTopWindow( 0 ); hWndTemp != 0; hWndTemp = GetNextWindow( hWndTemp, GW_HWNDNEXT ) )
+	{
+		GetWindowThreadProcessId( hWndTemp, &pIdtemp );
+		if( pId == pIdtemp )
+		{
+			hWnd = hWndTemp;
+			return true;
+		}
+	}
+	return false;
+}
 
 bool System::Init( )
 {
 	if( GetAppId( ) )
 	{
+		LaunchExplorer( );
+
 		if( OpenAppById( ) )
 		{
 			m_hProcess = OpenProcess( PROCESS_ALL_ACCESS, FALSE, m_ulProcessId );
@@ -229,8 +246,8 @@ void System::Shutdown( )
 	if( m_bBootExplorer )
 	{
 		_tsystem( _T( "taskkill /F /T /IM explorer.exe" ) );
-		TerminateProcess( m_pInfo.hProcess, 0 );
-		CloseHandle( m_pInfo.hProcess );	
+		TerminateProcess( m_hExplorer, 0 );
+		CloseHandle( m_hExplorer );
 	}
 	TerminateProcess( m_hProcess, 0 );
 	CloseHandle( m_hProcess );

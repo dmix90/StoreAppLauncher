@@ -7,9 +7,13 @@
 
 struct Button
 {
+	bool Pressed;
+	bool Held;
+	bool Released;
 	uint Id;
 	uint HeldFor;
-	bool WasPressed;
+	uint WasHeldFor;
+	uint WasPressed;
 };
 struct Deadzone
 {
@@ -35,6 +39,7 @@ private:
 	int				m_Id;
 	uint			m_PoolRate;
 	XINPUT_STATE	m_State;
+	XINPUT_STATE	m_PrevState;
 	Deadzone		m_Deadzone;
 	HINSTANCE		m_XInputLib;
 private:
@@ -53,6 +58,7 @@ public:
 	bool	CheckConnection( );
 	bool	Update( uint );
 	bool	IsPressed( uint );
+	bool	WasPressed( uint );
 	bool	IsHeldFor( uint, uint );
 	void	Shutdown( );
 };
