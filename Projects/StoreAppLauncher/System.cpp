@@ -1,7 +1,7 @@
 #include "System.h"
 
 System::System( )
-	:m_uNumArgs( 0 ), m_ulAppStatus( STILL_ACTIVE ), m_ulProcessId( 0 ), m_bUseController( false ), m_iControllerMode( 0 )
+	:m_uNumArgs( 0 ), m_ulAppStatus( STILL_ACTIVE ), m_ulProcessId( 0 ), m_bUseController( false ), m_bBootExplorer( false ), m_iControllerMode( 0 )
 {
 	m_wsArgs.clear( );
 	m_updater.reset( new Updater( ) );
@@ -36,18 +36,15 @@ bool System::GetAppId( )
 #ifdef _DEBUG
 		wcout << i << ": " << m_wsArgs[ i ].c_str() << endl;
 #endif
-		if( i == 2 )
+		if( !wcscmp( args[ i ], L"bp" ) )
 		{
-			if( !wcscmp( args[ 2 ], L"bp" ) )
-			{
-				m_bUseController = true;
-				m_iControllerMode = 0;
-			}
-			if( !wcscmp( args[ 2 ], L"bp1" ) )
-			{
-				m_bUseController = true;
-				m_iControllerMode = 1;
-			}
+			m_bUseController = true;
+			m_iControllerMode = 0;
+		}
+		if( !wcscmp( args[ i ], L"bp1" ) )
+		{
+			m_bUseController = true;
+			m_iControllerMode = 1;
 		}
 	}
 	if( m_wsArgs.size( ) > 1 )
@@ -56,25 +53,15 @@ bool System::GetAppId( )
 	}
 	else
 	{
-		switch( MessageBox( 0, L"Launch parameter was not found. Do you want to update executables within this directory?", L"WARNING: Missing parameter/Update", MB_ICONINFORMATION | MB_OKCANCEL | MB_DEFBUTTON2 ) )
-		{
-		case IDOK:
+		if( MessageBox( 0, L"Launch parameter was not found. Do you want to update executables within this directory?", L"WARNING: Missing parameter/Update", MB_ICONINFORMATION | MB_OKCANCEL | MB_DEFBUTTON2 ) == IDOK )
 		{
 #ifndef _DEBUG
-	OpenConsole( );
+			OpenConsole( );
 #endif
 			m_updater->Launch( );
 #ifndef _DEBUG
-	FreeConsole( );
+			FreeConsole( );
 #endif
-			break;
-		}
-		case IDCANCEL:
-		{
-			break;
-		}		
-		default:
-			break;
 		}
 	}
 	return false;
@@ -83,39 +70,146 @@ bool System::GetAppId( )
 bool System::OpenAppById( )
 {
 	HRESULT hr = S_OK;
+	CComPtr<IApplicationActivationManager> aam = nullptr;
 
 	hr = CoInitializeEx( nullptr, COINIT_APARTMENTTHREADED );
-	assert( SUCCEEDED( hr ) );
+	if( FAILED( hr ) )
+	{
+		for( uint i = 0; i < 5; i++ )
+		{
+			Sleep( 100 );
+			hr = CoInitializeEx( nullptr, COINIT_APARTMENTTHREADED );
+			if( SUCCEEDED( hr ) )
+			{
+				break;
+			}
+		}
+		assert( SUCCEEDED( hr ) );
+	}
 
-	CComPtr<IApplicationActivationManager> aam = nullptr;
 	hr = CoCreateInstance( CLSID_ApplicationActivationManager, nullptr, CLSCTX_LOCAL_SERVER, IID_PPV_ARGS( &aam ) );
-	assert( SUCCEEDED( hr ) );
+	if( FAILED( hr ) )
+	{
+		for( uint i = 0; i < 5; i++ )
+		{
+			Sleep( 100 );
+			hr = CoCreateInstance( CLSID_ApplicationActivationManager, nullptr, CLSCTX_LOCAL_SERVER, IID_PPV_ARGS( &aam ) );
+			if( SUCCEEDED( hr ) )
+			{
+				break;
+			}
+		}
+		assert( SUCCEEDED( hr ) );
+	}
+
 
 	hr = CoAllowSetForegroundWindow( aam, nullptr );
-	assert( SUCCEEDED( hr ) );
+	if( FAILED( hr ) )
+	{
+		for( uint i = 0; i < 5; i++ )
+		{
+			Sleep( 100 );
+			hr = CoAllowSetForegroundWindow( aam, nullptr );
+			if( SUCCEEDED( hr ) )
+			{
+				break;
+			}
+		}
+		assert( SUCCEEDED( hr ) );
+	}
+
 
 	hr = aam->ActivateApplication( m_wsArgs[1].c_str(), nullptr, AO_NONE, &m_ulProcessId );
-	if( SUCCEEDED( hr ) )
+	if( FAILED( hr ) )
 	{
-		return true;
-	}
-	else
-	{
+		for( uint i = 0; i < 5; i++ )
+		{
+			Sleep( 100 );
+			hr = aam->ActivateApplication( m_wsArgs[ 1 ].c_str( ), nullptr, AO_NONE, &m_ulProcessId );
+			if( SUCCEEDED( hr ) )
+			{
+				return true;
+			}
+		}
 		MessageBox( 0, L"Please double-check Application ID", L"ERROR: Application ID is probably not correct", MB_ICONERROR | MB_OK );
+		assert( SUCCEEDED( hr ) );
+	}
+	return true;
+}
+
+bool System::IsExplorerRunning( )
+{
+	bool exists = false;
+	PROCESSENTRY32 entry;
+	entry.dwSize = sizeof( PROCESSENTRY32 );
+
+	HANDLE snapshot = CreateToolhelp32Snapshot( TH32CS_SNAPPROCESS, NULL );
+
+	if( Process32First( snapshot, &entry ) )
+	{
+		while( Process32Next( snapshot, &entry ) )
+		{
+			if( !_wcsicmp( entry.szExeFile, L"explorer.exe" ) )
+			{
+				exists = true;
+				break;
+			}
+		}
+	}
+	CloseHandle( snapshot );
+	return exists;
+}
+void System::LaunchExplorer( )
+{
+	wstring buf( MAX_PATH, '\0' );
+	GetWindowsDirectory( &buf[ 0 ], MAX_PATH );
+	buf.resize( wcslen( &buf[ 0 ] ) );
+	buf += L"\\explorer.exe";
+
+	STARTUPINFO cif;
+	ZeroMemory( &cif, sizeof( cif ) );
+
+	if( !IsExplorerRunning( ) )
+	{
+		if( CreateProcess( buf.c_str( ), 0, 0, 0, FALSE, 0, 0, 0, &cif, &m_pInfo ) )
+		{
+			m_bBootExplorer = true;
+		}
+		else
+		{
+			MessageBox( 0, L"Explorer was not launched", L"ERROR: Unknown Error", MB_ICONERROR | MB_OK );
+		}
+	}
+}
+
+bool System::FindProcessWindow( HWND& hWnd, ulong pId )
+{
+	ulong pIdtemp = 0;
+	for( HWND hWndTemp = GetTopWindow( 0 ); hWndTemp != 0; hWndTemp = GetNextWindow( hWndTemp, GW_HWNDNEXT ) )
+	{
+		GetWindowThreadProcessId( hWndTemp, &pIdtemp );
+		if( pId == pIdtemp )
+		{
+			hWnd = hWndTemp;
+			return true;
+		}
 	}
 	return false;
 }
+
 bool System::Init( )
 {
-	bool status = false;
-	if( status = GetAppId( ) )
+	if( GetAppId( ) )
 	{
-		if( status = OpenAppById( ) )
+		LaunchExplorer( );
+
+		if( OpenAppById( ) )
 		{
 			m_hProcess = OpenProcess( PROCESS_ALL_ACCESS, FALSE, m_ulProcessId );
+			return true;
 		}
 	}
-	return status;
+	return false;
 }
 
 bool System::UseController( )
@@ -149,6 +243,12 @@ void System::Update( uint timeout )
 
 void System::Shutdown( )
 {
+	if( m_bBootExplorer )
+	{
+		_tsystem( _T( "taskkill /F /T /IM explorer.exe" ) );
+		TerminateProcess( m_hExplorer, 0 );
+		CloseHandle( m_hExplorer );
+	}
 	TerminateProcess( m_hProcess, 0 );
 	CloseHandle( m_hProcess );
 	CoUninitialize( );

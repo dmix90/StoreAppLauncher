@@ -5,6 +5,7 @@ class Keyboard
 {
 public:
 	void VirtualAltTab( );
+	void VirtualAltF4( );
 	void VirtualEnter( );
 	void VirtualGameDVR( );
 };

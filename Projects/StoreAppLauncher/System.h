@@ -14,15 +14,17 @@ private:
 	ulong				m_ulProcessId;
 	ulong				m_ulAppStatus;
 	void*				m_hProcess;
+	void*				m_hExplorer;
 	bool				m_bUseController;
+	bool				m_bBootExplorer;
 	int					m_iControllerMode;
-	HWND				m_hWndTop;
-	HWND				m_hWndBottom;
-	HWND				m_hWndApp;
-	HWND				m_hWndSteam;
+	PROCESS_INFORMATION m_pInfo;
 private:
 	bool GetAppId( );
 	bool OpenAppById( );
+	bool IsExplorerRunning( );
+	void LaunchExplorer( );
+	bool FindProcessWindow( HWND&, ulong );
 public:
 	void OpenConsole( );
 	bool Init( );

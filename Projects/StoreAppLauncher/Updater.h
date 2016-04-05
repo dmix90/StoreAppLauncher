@@ -18,7 +18,7 @@ private:
 private:
 	void GetCurrentDir( );
 	void GetCurrentDirFiles( );
-	void ListReadyFiles( );
+	bool ListReadyFiles( );
 	void ReplaceCurrentDirFiles( );
 public:
 	void Launch( );

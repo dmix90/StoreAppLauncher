@@ -50,13 +50,21 @@ void Updater::GetCurrentDirFiles( )
 		FindClose( hFind );
 	}
 }
-void Updater::ListReadyFiles( )
+bool Updater::ListReadyFiles( )
 {
-	wcout << "Files that will be replaced : " << endl << endl;
-	for( uint i = 0; i < m_wsFileList.size( ); i++ )
+	if( m_wsFileList.size( ) > 0 )
 	{
-		wcout << m_wsFileList[ i ].c_str( ) << endl;
+		wcout << "Files that will be replaced : " << endl << endl;
+		for( uint i = 0; i < m_wsFileList.size( ); i++ )
+		{
+			wcout << m_wsFileList[ i ].c_str( ) << endl;
+		}
+		return true;
 	}
+#ifndef _DEBUG
+	FreeConsole( );
+#endif
+	return false;
 }
 void Updater::ReplaceCurrentDirFiles( )
 {
@@ -67,16 +75,17 @@ void Updater::ReplaceCurrentDirFiles( )
 }
 void Updater::Launch( )
 {
-	wstring answer( 10, '\0' );
 	GetCurrentDir( );
 	GetCurrentDirFiles( );
-	ListReadyFiles( );
-	_tprintf( L"\nListed files are going to be updated/replaced with %s \nDo you want to continue? Y\\N \n>", m_wsExe.c_str( ) );
-	std::wcin >> &answer[0];
-	_wcslwr_s( &answer[0], answer.length() );
-	answer.resize( wcslen( &answer[ 0 ] ) );
-	if( !wcscmp( &answer[ 0 ], L"y" ) || !wcscmp( &answer[ 0 ], L"yes" ) )
+	if( ListReadyFiles( ) )
 	{
-		ReplaceCurrentDirFiles( );
+		if( MessageBox( 0, L"Listed files are going to be updated/replaced. Do you want to continue?", L"UPDATE: Confirmation", MB_ICONQUESTION | MB_YESNO | MB_DEFBUTTON1 ) == IDYES )
+		{
+			ReplaceCurrentDirFiles( );
+		}
+	}
+	else
+	{
+		MessageBox( 0, L"No files were found", L"UPDATE: Error", MB_ICONSTOP | MB_OK );
 	}
 }
