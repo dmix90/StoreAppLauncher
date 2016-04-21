@@ -28,8 +28,8 @@ void System::OpenConsole( )
 }
 bool System::GetAppId( )
 {
-	wchar_t** args = CommandLineToArgvW( GetCommandLine( ), &m_uNumArgs );
-
+	GetExecutableName( );
+	wchar_t** args = CommandLineToArgvW( GetCommandLine( ), &m_uNumArgs );	
 	for( uint i = 0; i < m_uNumArgs; i++ )
 	{
 		m_wsArgs.push_back( args[ i ] );
@@ -47,24 +47,26 @@ bool System::GetAppId( )
 			m_iControllerMode = 1;
 		}
 	}
-	if( m_wsArgs.size( ) > 1 )
-	{
-		return true;
-	}
-	else
-	{
-		if( MessageBox( 0, L"Launch parameter was not found. Do you want to update executables within this directory?", L"WARNING: Missing parameter/Update", MB_ICONINFORMATION | MB_OKCANCEL | MB_DEFBUTTON2 ) == IDOK )
-		{
-#ifndef _DEBUG
-			OpenConsole( );
-#endif
-			m_updater->Launch( );
-#ifndef _DEBUG
-			FreeConsole( );
-#endif
-		}
-	}
-	return false;
+//	if( m_wsArgs.size( ) > 1 )
+//	{
+//		return true;
+//	}
+//	else
+//	{
+//
+//		if( MessageBox( 0, L"Launch parameter was not found. Do you want to update executables within this directory?", L"WARNING: Missing parameter/Update", MB_ICONINFORMATION | MB_OKCANCEL | MB_DEFBUTTON2 ) == IDOK )
+//		{
+//#ifndef _DEBUG
+//			OpenConsole( );
+//#endif
+//			m_updater->Launch( );
+//#ifndef _DEBUG
+//			FreeConsole( );
+//#endif
+//		}
+//	}
+//	return false;
+	return true;
 }
 
 bool System::OpenAppById( )
@@ -118,8 +120,26 @@ bool System::OpenAppById( )
 		assert( SUCCEEDED( hr ) );
 	}
 
-
-	hr = aam->ActivateApplication( m_wsArgs[1].c_str(), nullptr, AO_NONE, &m_ulProcessId );
+	hr = aam->ActivateApplication( m_wsExeName.c_str( ) , nullptr, AO_NONE, &m_ulProcessId );
+	if( FAILED( hr ) )
+	{
+		for( uint i = 0; i < 5; i++ )
+		{
+			Sleep( 100 );
+			hr = aam->ActivateApplication( m_wsExeName.c_str( ), nullptr, AO_NONE, &m_ulProcessId );
+			if( SUCCEEDED( hr ) )
+			{
+				return true;
+			}
+		}
+		MessageBox( 0, L"Please double-check Application ID", L"ERROR: Application ID is probably not correct", MB_ICONERROR | MB_OK );
+		assert( SUCCEEDED( hr ) );
+	}
+	else
+	{
+		return true;
+	}
+	hr = aam->ActivateApplication( m_wsArgs[ 1 ].c_str( ), nullptr, AO_NONE, &m_ulProcessId );
 	if( FAILED( hr ) )
 	{
 		for( uint i = 0; i < 5; i++ )
@@ -195,6 +215,20 @@ bool System::FindProcessWindow( HWND& hWnd, ulong pId )
 		}
 	}
 	return false;
+}
+
+void System::GetExecutableName( )
+{
+	wstring fileName( MAX_PATH, '\0' );
+	GetModuleFileName( 0, &fileName[ 0 ], (ulong)fileName.length( ) );
+	wstring out( MAX_PATH, '\0' );
+	out = PathFindFileName( &fileName[ 0 ] );
+	fileName.resize( wcslen( &fileName[ 0 ] ) );
+	*( PathFindExtension( &out[ 0 ] ) ) = 0;
+	out.resize( wcslen( &out[ 0 ] ) );
+	wcout << out.c_str() << endl;
+	m_wsExeName = out;
+	wcout << m_wsExeName.c_str( ) << endl;
 }
 
 bool System::Init( )

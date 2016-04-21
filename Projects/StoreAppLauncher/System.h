@@ -19,12 +19,14 @@ private:
 	bool				m_bBootExplorer;
 	int					m_iControllerMode;
 	PROCESS_INFORMATION m_pInfo;
+	wstring				m_wsExeName;
 private:
 	bool GetAppId( );
 	bool OpenAppById( );
 	bool IsExplorerRunning( );
 	void LaunchExplorer( );
 	bool FindProcessWindow( HWND&, ulong );
+	void GetExecutableName( );
 public:
 	void OpenConsole( );
 	bool Init( );
