@@ -11,15 +11,20 @@ private:
 private:
 	int					m_uNumArgs;
 	vector<wstring>		m_wsArgs;
+	vector<wstring>		m_wsKnownArgs;
+	vector<wstring>		m_wsAppsList;
 	ulong				m_ulProcessId;
 	ulong				m_ulAppStatus;
 	void*				m_hProcess;
 	void*				m_hExplorer;
 	bool				m_bUseController;
 	bool				m_bBootExplorer;
+	bool				m_bUseDSR;
+	bool				m_bCheckParameterForId;
 	int					m_iControllerMode;
 	PROCESS_INFORMATION m_pInfo;
 	wstring				m_wsExeName;
+	DEVMODE				m_dm;
 private:
 	bool GetAppId( );
 	bool OpenAppById( );
@@ -27,6 +32,8 @@ private:
 	void LaunchExplorer( );
 	bool FindProcessWindow( HWND&, ulong );
 	void GetExecutableName( );
+	bool GenerateExecutables( );
+	void SwitchResolution( bool restore = false );
 public:
 	void OpenConsole( );
 	bool Init( );

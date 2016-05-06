@@ -22,6 +22,14 @@
 #include <stdlib.h>
 #include <crtdbg.h>
 
+#include <windows.foundation.h>
+#include <Windows.ApplicationModel.h>
+#include <windows.management.deployment.h>
+#include <wrl\wrappers\corewrappers.h>
+#include <wrl\client.h>
+#include <wrl\implements.h>
+#include <comutil.h>
+
 using std::wcout;
 using std::endl;
 using std::string;
@@ -35,3 +43,11 @@ using std::mutex;
 
 typedef unsigned long	ulong;
 typedef unsigned short	uint;
+
+
+using namespace ABI::Windows::Foundation;
+using namespace ABI::Windows::Management;
+using namespace ABI::Windows::Management::Deployment;
+using namespace ABI::Windows::ApplicationModel;
+using namespace Microsoft::WRL;
+using namespace Microsoft::WRL::Wrappers;

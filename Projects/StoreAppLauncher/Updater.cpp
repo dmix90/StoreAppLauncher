@@ -61,9 +61,6 @@ bool Updater::ListReadyFiles( )
 		}
 		return true;
 	}
-#ifndef _DEBUG
-	FreeConsole( );
-#endif
 	return false;
 }
 void Updater::ReplaceCurrentDirFiles( )
@@ -82,6 +79,9 @@ void Updater::Launch( )
 		if( MessageBox( 0, L"Listed files are going to be updated/replaced. Do you want to continue?", L"UPDATE: Confirmation", MB_ICONQUESTION | MB_YESNO | MB_DEFBUTTON1 ) == IDYES )
 		{
 			ReplaceCurrentDirFiles( );
+#ifndef _DEBUG
+			FreeConsole( );
+#endif
 		}
 	}
 	else
