@@ -58,6 +58,7 @@ This parameter only works when paired with "-downsampling" parameter. It's purpo
 #VERSION 1.0.0
 =============
 Features:
+
 1. Launch Windows Store apps through Steam with displayed status while app is running.
 
 2. If explorer is not running launcher will attempt to start if first and then launch app itself, when app is closed it launcher will try to close explorer as well. This is needed since Windows Store apps do not work without explorer. Should be useful to all 5 people in the world( hey bros! ) who use Steam Big Picture as their default Windows startup Shell :D
