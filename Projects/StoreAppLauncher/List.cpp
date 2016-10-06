@@ -262,7 +262,9 @@ void List::ShowAppList( bool filter )
 	ParseAppManifest( );
 
 	std::wofstream file;
-	file.open( "Applications.txt" );
+	wstring outDir = L"_Applications\\";
+	CreateDirectory( outDir.c_str( ), nullptr );
+	file.open( "_Applications\\_Applications.txt" );
 	wcout << L"wtest" << endl;
 	for( map<wstring, wstring>::iterator it = m_mFinalAppMap.begin( ); it != m_mFinalAppMap.end( ); ++it )
 	{
@@ -286,7 +288,7 @@ vector<wstring> List::FinalIdVec( )
 void List::Launch( bool filter )
 {
 	ShowAppList( filter );
-	_tsystem( _T( "explorer.exe ""Applications.txt"" " ) );
+	_tsystem( _T( "explorer.exe ""_Applications\\_Applications.txt"" " ) );
 	Shutdown( );
 }
 

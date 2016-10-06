@@ -212,15 +212,16 @@
     <ClInclude Include="Keyboard.h" />
     <ClInclude Include="List.h" />
     <ClInclude Include="Resource.h" />
+    <ClInclude Include="resource1.h" />
     <ClInclude Include="System.h" />
     <ClInclude Include="Tools.h" />
     <ClInclude Include="Updater.h" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="StoreAppLauncher.rc" />
+    <Image Include="..\..\Content\Ico\Main.ico" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="..\..\Content\Ico\Main.ico" />
+    <ResourceCompile Include="StoreAppLauncher.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,5 +1,4 @@
 #include "Controller.h"
-#include <DirectXTK\GamePad.h>
 
 int ControllerButtons[ ] =
 {
