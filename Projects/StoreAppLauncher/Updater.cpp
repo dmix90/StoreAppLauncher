@@ -4,10 +4,6 @@ Updater::Updater( )
 {
 	m_wsDir.resize( MAX_PATH, '\0' );
 }
-
-Updater::~Updater( )
-{
-}
 void Updater::GetCurrentDir( )
 {
 	GetModuleFileName( 0, &m_wsDir[ 0 ], (ulong)m_wsDir.length( ) );
@@ -46,9 +42,8 @@ void Updater::GetCurrentDirFiles( )
 				}	
 			}
 		} while( FindNextFile( hFind, &data ) != 0 );
-
-		FindClose( hFind );
 	}
+	FindClose( hFind );
 }
 bool Updater::ListReadyFiles( )
 {
@@ -61,9 +56,6 @@ bool Updater::ListReadyFiles( )
 		}
 		return true;
 	}
-#ifndef _DEBUG
-	FreeConsole( );
-#endif
 	return false;
 }
 void Updater::ReplaceCurrentDirFiles( )
@@ -73,19 +65,39 @@ void Updater::ReplaceCurrentDirFiles( )
 		CopyFile( m_wsExe.c_str( ), m_wsFileList[ i ].c_str( ), FALSE );
 	}
 }
+void Updater::GenerateExecutables( )
+{
+	wstring outDir = L"_Applications\\";
+	CreateDirectory( outDir.c_str( ), nullptr );
+	wstring finPathAndName;
+	for( uint i = 0; i < m_wsAppId.size( ); i++ )
+	{
+		m_wsAppId[ i ] += L".exe";
+		finPathAndName = outDir + m_wsAppId[ i ];
+		CopyFile( m_wsExe.c_str( ), finPathAndName.c_str( ) , FALSE );
+	}
+}
+void Updater::GetAppIdVec( vector<wstring> vec )
+{
+	m_wsAppId = vec;
+}
 void Updater::Launch( )
 {
+	//GetCurrentDir( );
+	//GetCurrentDirFiles( );
+	//if( ListReadyFiles( ) )
+	//{
+	//	if( MessageBox( 0, L"Executable files which are currently in directory with launcher are going to be updated/replaced. Do you want to continue?", L"UPDATE: Confirmation", MB_ICONQUESTION | MB_YESNO | MB_DEFBUTTON1 ) == IDYES )
+	//	{
+	//		ReplaceCurrentDirFiles( );
+	//	}
+	//}
+	//else
+	//{
+	//	GenerateExecutables( );
+	//	_tsystem( _T( "explorer.exe ""_Apps"" " ) );
+	//}
 	GetCurrentDir( );
-	GetCurrentDirFiles( );
-	if( ListReadyFiles( ) )
-	{
-		if( MessageBox( 0, L"Listed files are going to be updated/replaced. Do you want to continue?", L"UPDATE: Confirmation", MB_ICONQUESTION | MB_YESNO | MB_DEFBUTTON1 ) == IDYES )
-		{
-			ReplaceCurrentDirFiles( );
-		}
-	}
-	else
-	{
-		MessageBox( 0, L"No files were found", L"UPDATE: Error", MB_ICONSTOP | MB_OK );
-	}
+	GenerateExecutables( );
+	_tsystem( _T( "explorer.exe ""_Applications"" " ) );
 }

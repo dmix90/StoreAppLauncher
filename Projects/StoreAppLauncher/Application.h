@@ -14,6 +14,7 @@ private:
 	HANDLE	m_hAppHandle;
 public:
 	Application( );
-	~Application( );
-	int Run( );
+	~Application( ) { };
+public:
+	bool Run( );
 };

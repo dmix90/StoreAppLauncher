@@ -243,3 +243,6 @@ ModelManifest.xml
 
 # FAKE - F# Make
 .fake/
+/Projects/StoreAppLauncher/Applications.txt
+/Projects/StoreAppLauncher/output.txt
+/_Release/Beta4
