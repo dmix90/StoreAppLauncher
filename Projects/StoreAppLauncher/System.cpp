@@ -2,58 +2,50 @@
 
 System::System( )
 	:m_uNumArgs( 0 ), m_ulAppStatus( STILL_ACTIVE ), m_ulProcessId( 0 ), m_bUseController( false ), m_bBootExplorer( false ), m_iControllerMode( 0 ),
-	m_hProcess( nullptr ), m_hExplorer( nullptr ), m_bCheckParameterForId( true ), m_bUseDSR( false )
+	m_hProcess( nullptr ), m_hExplorer( nullptr ), m_bCheckParameterForId( true ), m_bUseDSR( false ), m_bLimitResolution( false )
 {
 	m_wsArgs.clear( );
-	m_updater.reset( new Updater( ) );
+	m_pUpdater.reset( new Updater( ) );
+	m_pList.reset( new List( ) );
+	m_pDialog.reset( new Dialog( ) );
 
-	m_wsKnownArgs = { L"bp", L"bp1", L"dsr" };
+	m_wsKnownArgs = { L"bigpicture0", L"-bigpicture", L"-downsampling", L"-maxres_" };
 
 	m_dm.dmSize = sizeof( m_dm );
-}
-
-System::~System( )
-{
-}
-void System::OpenConsole( )
-{
-	AllocConsole( );
-
-	HANDLE handle_out = GetStdHandle( STD_OUTPUT_HANDLE );
-	int hCrt = _open_osfhandle( (long)handle_out, _O_TEXT );
-	FILE* hf_out = _fdopen( hCrt, "w" );
-	setvbuf( hf_out, NULL, _IONBF, 1 );
-	*stdout = *hf_out;
-
-	HANDLE handle_in = GetStdHandle( STD_INPUT_HANDLE );
-	hCrt = _open_osfhandle( (long)handle_in, _O_TEXT );
-	FILE* hf_in = _fdopen( hCrt, "r" );
-	setvbuf( hf_in, NULL, _IONBF, 128 );
-	*stdin = *hf_in;
 }
 bool System::GetAppId( )
 {
 	GetExecutableName( );
-	wchar_t** args = CommandLineToArgvW( GetCommandLine( ), &m_uNumArgs );	
+	wchar_t** args = CommandLineToArgvW( GetCommandLine( ), &m_uNumArgs );
 	for( uint i = 0; i < m_uNumArgs; i++ )
 	{
 		m_wsArgs.push_back( args[ i ] );
 #ifdef _DEBUG
 		wcout << i << ": " << m_wsArgs[ i ].c_str() << endl;
 #endif
-		if( !wcscmp( args[ i ], L"bp" ) )
-		{
-			m_bUseController = true;
-			m_iControllerMode = 0;
-		}
-		if( !wcscmp( args[ i ], L"bp1" ) )
+		if( !wcscmp( args[ i ], L"-bigpicture" ) )
 		{
 			m_bUseController = true;
 			m_iControllerMode = 1;
 		}
-		if( !wcscmp( args[ i ], L"dsr" ) )
+		if( !wcscmp( args[ i ], L"-bigpicture0" ) )
+		{
+			m_bUseController = true;
+			m_iControllerMode = 0;
+		}
+		if( !wcscmp( args[ i ], L"-downsampling" ) )
 		{
 			m_bUseDSR = true;
+		}
+		if( m_bUseDSR && ( m_wsArgs[i].find( L"-maxres_" ) != wstring::npos ) )
+		{
+			m_bLimitResolution = true;
+			wstring::size_type t = m_wsArgs[ i ].find( L"-maxres_" );
+			if( t != wstring::npos )
+			{
+				m_wsArgs[ i ].erase( t, m_wsKnownArgs[ 3 ].size( ) );
+				m_wsMaxRes = m_wsArgs[ i ];
+			}			
 		}
 	}
 	if( m_wsArgs.size( ) > 1 )
@@ -150,20 +142,20 @@ bool System::OpenAppById( )
 				}
 			}
 		}
-		//MessageBox( 0, L"Please double-check id", L"ERROR: Executable name or parameter is probably not correct", MB_ICONERROR | MB_OK );
-		//assert( SUCCEEDED( hr ) );
 	}
 	else
 	{
 		return true;
 	}
-
-	if( MessageBox( 0, L"Launch parameter was not found. Do you want to update executables within this directory?", L"WARNING: Missing parameter/Update", MB_ICONINFORMATION | MB_OKCANCEL | MB_DEFBUTTON2 ) == IDOK )
+	if( Tools::Instance( )->AreElevatedRightsAvailable( ) )
 	{
-#ifndef _DEBUG
-		OpenConsole( );
-#endif
-		m_updater->Launch( );
+		m_pDialog->GetFunc( bind( &System::GenerateExecutables, this, std::placeholders::_1 ) );
+		m_pDialog->Init( );	
+	}
+	else
+	{
+		MessageBox( 0, L"To generate executables you should run this with admin rights: \nRight Click -> Run as Administrator",
+					L"ERROR: Administrator rights required", MB_ICONERROR | MB_OK );
 	}
 	return false;
 }
@@ -242,102 +234,14 @@ void System::GetExecutableName( )
 	wcout << m_wsExeName.c_str( ) << endl;
 }
 
-bool System::GenerateExecutables( )
-{
-//	wstring blacklist[ ] = {
-//		L"Microsoft.3DBuilder",
-//		L"Microsoft.AAD.BrokerPlugin",
-//		L"Microsoft.AccountsControl",
-//		L"Microsoft.Appconnector",
-//		L"Microsoft.Bing",
-//		L"Microsoft.BioEnrollment",
-//		L"Microsoft.CommsPhone",
-//		L"Microsoft.ConnectivityStore",
-//		L"Microsoft.FreshPaint",
-//		L"Microsoft.Getstarted",
-//		L"Microsoft.LockApp",
-//		L"Microsoft.Messaging",
-//		L"Microsoft.MicrosoftEdge",
-//		L"Microsoft.MicrosoftOfficeHub",
-//		L"Microsoft.NET",
-//		L"Microsoft.Office",
-//		L"Microsoft.People",
-//		L"Microsoft.SkypeApp",
-//		L"Microsoft.VCLibs",
-//		L"Microsoft.WinJS",
-//		L"Microsoft.Windows",
-//		L"microsoft.windows",
-//		L"Microsoft.Xbox",
-//		L"Microsoft.Zune",
-//		L"Windows.",
-//		L"windows.",
-//		L"ASUSWelcome"
-//	};
-//#ifndef _DEBUG
-//	OpenConsole( );
-//#endif // !_DEBUG
-//
-//	HString test;
-//	test.Set( RuntimeClass_Windows_Management_Deployment_PackageManager );
-//
-//	ComPtr<IActivationFactory> af;
-//	RoGetActivationFactory( test.Get( ), __uuidof( IActivationFactory ), (void **)&af );
-//
-//	ComPtr<IInspectable> iinsp;
-//	af->ActivateInstance( &iinsp );
-//
-//	ComPtr<IPackageManager2> pm;
-//	iinsp.As( &pm );
-//
-//	ComPtr<Collections::IIterable<Package*>> iiterable;
-//
-//	pm->FindPackagesWithPackageTypes( PackageTypes::PackageTypes_Main, &iiterable );
-//
-//	ComPtr<Collections::IIterator<Package*>> pIter;
-//	iiterable->First( &pIter );
-//
-//	boolean hasCurrent;
-//
-//	for( pIter->get_HasCurrent( &hasCurrent ); hasCurrent; pIter->MoveNext( &hasCurrent ) )
-//	{
-//		ComPtr<IPackage> ipkg;
-//		pIter->get_Current( &ipkg );
-//
-//		ComPtr<IPackageId> ipkgid;
-//		ipkg->get_Id( &ipkgid );
-//		HString name6;
-//		ipkg->GetRuntimeClassName( name6.GetAddressOf( ) );
-//
-//		HString name;
-//
-//		ipkgid->get_FamilyName( name.GetAddressOf( ) );
-//		wstring temp = name.GetRawBuffer( 0 );
-//		m_wsAppsList.push_back( temp );
-//	}
-//	vector<wstring> testvec;
-//	for( uint i = 0; i < ARRAYSIZE( blacklist ); i++ )
-//	{
-//
-//	}
-//	wcout << endl << "Total unfiltered: " << m_wsAppsList.size( ) << endl;
-//	wcout << "Filtered: " << endl;
-//	for( uint i = 0; i < testvec.size( ); i++ )
-//	{
-//		wcout << testvec[ i ].c_str( ) << endl;
-//	}
-//	wcout << endl << "Total filtered: " << testvec.size( ) <<  endl;
-//	system( "pause" );
-//#ifndef _DEBUG
-//	FreeConsole( );
-//#endif
-	return false;
-}
-
 void System::SwitchResolution( bool restore )
 {
 	if( !restore )
 	{
 		EnumDisplaySettings( 0, ENUM_CURRENT_SETTINGS, &m_dm );
+		ulong curResX = m_dm.dmPelsWidth;
+		ulong curResY = m_dm.dmPelsHeight;
+
 		DEVMODE dmTemp = m_dm;
 
 		vector<ulong> tempResX;
@@ -352,28 +256,68 @@ void System::SwitchResolution( bool restore )
 			tempResY.push_back( dmTemp.dmPelsHeight );
 		}
 
-		maxResX = *std::max_element( tempResX.begin( ), tempResX.end( ) );
-		maxResY = *std::max_element( tempResY.begin( ), tempResY.end( ) );
+		if( !m_bLimitResolution )
+		{
+			maxResX = *std::max_element( tempResX.begin( ), tempResX.end( ) );
+			maxResY = *std::max_element( tempResY.begin( ), tempResY.end( ) );
+		}
+		else
+		{
+			vector<uint> vecTemp;
+			uint temp;
+			std::wstringstream ss( m_wsMaxRes );
+			while( ss >> temp )
+			{
+				vecTemp.push_back( temp );
+				if( ss.peek( ) == L'x' )
+				{
+					ss.ignore( );
+				}
+			}
+
+			maxResX = vecTemp[ 0 ];
+			maxResY = vecTemp[ 1 ];
+		}
 
 		dmTemp.dmPelsWidth = maxResX;
 		dmTemp.dmPelsHeight = maxResY;
 		dmTemp.dmDisplayFrequency = m_dm.dmDisplayFrequency;
 
-		if( ChangeDisplaySettings( &dmTemp, CDS_FULLSCREEN ) != DISP_CHANGE_SUCCESSFUL )
+		if( ( curResX != maxResX ) && ( curResY != maxResY ) )
 		{
-			SwitchResolution( true );
-			MessageBox( 0, L"Display resolution switch failure", L"ERROR: Display resolution switch failure", MB_ICONERROR | MB_OK );
+			if( ChangeDisplaySettings( &dmTemp, CDS_FULLSCREEN ) != DISP_CHANGE_SUCCESSFUL )
+			{
+				SwitchResolution( true );
+
+				Tools::Instance( )->MessageBoxTimeout( nullptr, L"Selected maximum resolution is not supported",
+													   L"ERROR: Display resolution switch failure",
+													   MB_ICONERROR, 0, 3000 );
+			}
+			Sleep( 2500 );
 		}
-		Sleep( 2500 );
 	}
 	else
 	{
-		if( ChangeDisplaySettings( &m_dm, CDS_FULLSCREEN ) != DISP_CHANGE_SUCCESSFUL )
+		DEVMODE dmTemp;
+		EnumDisplaySettings( 0, ENUM_CURRENT_SETTINGS, &dmTemp );
+		if( ( m_dm.dmPelsWidth != dmTemp.dmPelsWidth ) && ( m_dm.dmPelsHeight != dmTemp.dmPelsHeight ) )
 		{
-			MessageBox( 0, L"Display resolution switch failure", L"ERROR: Display resolution switch failure", MB_ICONERROR | MB_OK );
-		}	
-		Sleep( 2500 );
+			if( ChangeDisplaySettings( &m_dm, CDS_FULLSCREEN ) != DISP_CHANGE_SUCCESSFUL )
+			{
+				Tools::Instance( )->MessageBoxTimeout( nullptr, L"Could not restore original display resolution",
+													   L"ERROR: Display resolution switch failure",
+													   MB_ICONERROR, 0, 3000 );
+			}
+			Sleep( 2500 );
+		}
 	}
+}
+
+void System::GenerateExecutables( bool filter )
+{
+	m_pList->Launch( filter );
+	m_pUpdater->GetAppIdVec( m_pList->FinalIdVec( ) );
+	m_pUpdater->Launch( );
 }
 
 bool System::Init( )

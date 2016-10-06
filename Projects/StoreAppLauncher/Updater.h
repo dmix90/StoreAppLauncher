@@ -1,5 +1,5 @@
 #pragma once
-#include "Common.h"
+#include "Tools.h"
 #include <atlbase.h>
 #include <ShObjIdl.h>
 #include <strsafe.h>
@@ -10,9 +10,10 @@ class Updater
 {
 public:
 	Updater( );
-	~Updater( );
+	~Updater( ) { };
 private:
 	vector<wstring> m_wsFileList;
+	vector<wstring> m_wsAppId;
 	wstring m_wsExe;
 	wstring m_wsDir;
 private:
@@ -20,6 +21,8 @@ private:
 	void GetCurrentDirFiles( );
 	bool ListReadyFiles( );
 	void ReplaceCurrentDirFiles( );
+	void GenerateExecutables( );
 public:
+	void GetAppIdVec( vector<wstring> );
 	void Launch( );
 };

@@ -1,5 +1,8 @@
 #include "Application.h"
 
+#pragma comment(lib, "runtimeobject.lib")
+#pragma comment(lib, "tinyxml2.lib")
+
 int APIENTRY wWinMain( HINSTANCE, HINSTANCE, LPWSTR, int )
 {
 #ifdef _DEBUG

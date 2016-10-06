@@ -1,13 +1,17 @@
 #pragma once
 #include "Updater.h"
+#include "List.h"
+#include "Dialog.h"
 
 class System
 {
 public:
 	System( );
-	~System( );
+	~System( ) { };
 private:
-	unique_ptr<Updater>	m_updater;
+	unique_ptr<Updater>	m_pUpdater;
+	unique_ptr<List>	m_pList;
+	unique_ptr<Dialog>	m_pDialog;
 private:
 	int					m_uNumArgs;
 	vector<wstring>		m_wsArgs;
@@ -20,10 +24,12 @@ private:
 	bool				m_bUseController;
 	bool				m_bBootExplorer;
 	bool				m_bUseDSR;
+	bool				m_bLimitResolution;
 	bool				m_bCheckParameterForId;
 	int					m_iControllerMode;
 	PROCESS_INFORMATION m_pInfo;
 	wstring				m_wsExeName;
+	wstring				m_wsMaxRes;
 	DEVMODE				m_dm;
 private:
 	bool GetAppId( );
@@ -32,10 +38,9 @@ private:
 	void LaunchExplorer( );
 	bool FindProcessWindow( HWND&, ulong );
 	void GetExecutableName( );
-	bool GenerateExecutables( );
 	void SwitchResolution( bool restore = false );
+	void GenerateExecutables( bool filter );
 public:
-	void OpenConsole( );
 	bool Init( );
 	bool UseController( );
 	bool StillRunning( );

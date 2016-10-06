@@ -1,20 +1,14 @@
 #include "Application.h"
 
 Application::Application( )
-	:m_wsUniqueMutex( L"StoreAppLauncher" ), m_hAppHandle( nullptr )
+	: m_wsUniqueMutex( L"StoreAppLauncher" ), m_hAppHandle( nullptr )
 {
 	system.reset( new System( ) );
 	controller.reset( new Controller( ) );
 	keyboard.reset( new Keyboard( ) );
 }
-Application::~Application( )
+bool Application::Run( )
 {
-}
-int Application::Run( )
-{
-#ifdef _DEBUG
-	system->OpenConsole( );
-#endif
 	m_hAppHandle = CreateMutex( 0, TRUE, m_wsUniqueMutex.c_str( ) );
 	if( GetLastError( ) == ERROR_ALREADY_EXISTS )
 	{
@@ -24,7 +18,7 @@ int Application::Run( )
 	if( system->Init( ) )
 	{
 		if( system->UseController( ) )
-		{	
+		{
 			thread t1( &System::Update, system.get( ), 1500 );
 			t1.detach( );
 			while( system->StillRunning( ) )
@@ -44,7 +38,7 @@ int Application::Run( )
 						Sleep( 200 );
 						break;
 					}
-					if( controller->IsPressed( XINPUT_GAMEPAD_BACK ) && 
+					if( controller->IsPressed( XINPUT_GAMEPAD_BACK ) &&
 						controller->IsPressed( XINPUT_GAMEPAD_START ) &&
 						controller->m_LeftTrigger.Value > 0 )
 					{
@@ -54,9 +48,9 @@ int Application::Run( )
 						break;
 					}
 					break;
-				}		
+				}
 				case 1:
-				{	
+				{
 					if( controller->IsPressed( XINPUT_GAMEPAD_GUIDE ) &&
 						controller->IsPressed( XINPUT_GAMEPAD_BACK ) )
 					{
@@ -72,6 +66,14 @@ int Application::Run( )
 						Sleep( 200 );
 						break;
 					}
+					if( controller->IsPressed( XINPUT_GAMEPAD_BACK ) &&
+						controller->IsPressed( XINPUT_GAMEPAD_RIGHT_THUMB ) )
+					{
+						Beep( 250, 400 );
+						keyboard->VirtualGameDVR( );
+						Sleep( 200 );
+						break;
+					}
 					break;
 				}
 				default:
@@ -83,15 +85,12 @@ int Application::Run( )
 		{
 			system->Update( 1500 );
 		}
+		keyboard->VirtualAltTab( );
 	}
-	keyboard->VirtualAltTab( );
 	controller->Shutdown( );
 	system->Shutdown( );
 
 	ReleaseMutex( m_hAppHandle );
 	CloseHandle( m_hAppHandle );
-#ifdef _DEBUG
-	FreeConsole( );
-#endif
 	return 0;
 }
