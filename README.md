@@ -17,6 +17,7 @@ You need to generate app executables using launcher itself or you will have to f
 4. Switch folder view mode to "Details".
 5. Find application you need and look at AppUserModelID column it will show ID you looking for.
 6. Enter this id as a parameter to StoreAppLauncher_xXX.exe or rename launcher executable to this id( for example it should look like this -> Microsoft.WindowsCalculator_8wekyb3d8bbwe!App.exe )
+
 ============================================================
 
 #How to use launcher:
