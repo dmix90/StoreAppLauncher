@@ -1,6 +1,6 @@
 06.10.2016 || dmix90
 ============================================================
-	#Windows Store application launcher for Steam
+#Windows Store application launcher for Steam
 ============================================================
 
 You need to generate app executables using launcher itself or you will have to find application id's manually.
