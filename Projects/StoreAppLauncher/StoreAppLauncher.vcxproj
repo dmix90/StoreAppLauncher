@@ -212,7 +212,6 @@
     <ClInclude Include="Keyboard.h" />
     <ClInclude Include="List.h" />
     <ClInclude Include="Resource.h" />
-    <ClInclude Include="resource1.h" />
     <ClInclude Include="System.h" />
     <ClInclude Include="Tools.h" />
     <ClInclude Include="Updater.h" />
