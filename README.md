@@ -34,13 +34,16 @@ Only four additional parameters are supported at this moment:
 
 #"-bigpicture":
 Alt+Tab -> press Guide. You should hear "Beep" and get back to Steam Big Picture Interface.
+
 Alt+F4  -> press Guide + Back. You should hear "Beep" , app should close and you should be back to Big Picture interface.
+
 Win+G 	-> press RightThumb + Back, You should hear "Beep" and Windows 10 Game Bar should popup.
 
 NOTE: To make Guide button work in this scenario you need to disable Guide button functionality in Xbox Game Bar options.
 
 #"-bigpicture0":
 Alt+Tab -> press Back + Start + LeftTrigger. You should hear "Beep" and get back to Steam Big Picture Interface.
+
 Alt+F4  -> press Back + Start + LeftTrigger + RightTrigger. You should hear "Beep" , app should close and you should be back to Big Picture interface.
 
 #"-downsampling":
