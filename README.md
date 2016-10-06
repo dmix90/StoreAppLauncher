@@ -57,9 +57,11 @@ This parameter only works when paired with "-downsampling" parameter. It's purpo
 =============
 #VERSION 1.0.0
 =============
-
 Features:
 1. Launch Windows Store apps through Steam with displayed status while app is running.
+
 2. If explorer is not running launcher will attempt to start if first and then launch app itself, when app is closed it launcher will try to close explorer as well. This is needed since Windows Store apps do not work without explorer. Should be useful to all 5 people in the world( hey bros! ) who use Steam Big Picture as their default Windows startup Shell :D
+
 3. Automatic Windows Desktop resolution switch before launching app and restore previous resolution when app is closed. Should be useful for certain Windows Store games that do not properly support internal resolution scaling( Quantum Break, Killer Instinct, Forza 6 Apex, Forza Horizon 3 etc ). To use this add "-downsampling" parameter to your launch options. Limit maximum downsampling resolution with "-maxres_XXXXxXXXX" parameter.
+
 4. Use "-bigpicture" parameter if you want to play Windows Store games using Steam Big Picture interface. Without this parameter you will control BP interface in background when you click Guide button during gameplay. With this parameter Guide button will be used as Alt+Tab keyboard shortcut. This parameter might affect controller input a little since when it's enabled it checks for button presses in background at the same time with game. More information on this parameter above.
