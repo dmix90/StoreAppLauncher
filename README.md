@@ -1,3 +1,5 @@
+EDIT: Check issues section for new dirty build
+
 06.10.2016 || dmix90
 ============================================================
 #Windows Store application launcher for Steam
